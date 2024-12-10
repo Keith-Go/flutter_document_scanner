@@ -5,6 +5,8 @@
 // license that can be found in the LICENSE file or at
 // https://opensource.org/licenses/MIT.
 
+// ignore_for_file: unused_element
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -94,6 +96,16 @@ class _CameraPreview extends StatelessWidget {
             ),
           );
         }
+        final mediaSize = Size(
+          MediaQuery.of(context).size.width -
+              takePhotoDocumentStyle.left -
+              takePhotoDocumentStyle.right,
+          MediaQuery.of(context).size.height -
+              takePhotoDocumentStyle.top -
+              takePhotoDocumentStyle.bottom,
+        );
+        final deviceRatio = mediaSize.aspectRatio;
+        final cameraAspectRatio = state.value.aspectRatio;
 
         return Stack(
           fit: StackFit.expand,
@@ -104,9 +116,19 @@ class _CameraPreview extends StatelessWidget {
               bottom: takePhotoDocumentStyle.bottom,
               left: takePhotoDocumentStyle.left,
               right: takePhotoDocumentStyle.right,
-              child: takePhotoDocumentStyle.filterWidget
-                      ?.call(CameraPreview(state)) ??
-                  CameraPreview(state),
+              child: Center(
+                child: OverflowBox(
+                  maxWidth: deviceRatio > cameraAspectRatio
+                      ? mediaSize.width
+                      : mediaSize.height * cameraAspectRatio,
+                  maxHeight: deviceRatio > cameraAspectRatio
+                      ? mediaSize.width / cameraAspectRatio
+                      : mediaSize.height,
+                  child: takePhotoDocumentStyle.filterWidget
+                          ?.call(CameraPreview(state)) ??
+                      CameraPreview(state),
+                ),
+              ),
             ),
 
             // * children
@@ -121,5 +143,19 @@ class _CameraPreview extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+class _MediaSizeClipper extends CustomClipper<Rect> {
+  const _MediaSizeClipper(this.mediaSize);
+  final Size mediaSize;
+  @override
+  Rect getClip(Size size) {
+    return Rect.fromLTWH(0, 0, mediaSize.width, mediaSize.height);
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Rect> oldClipper) {
+    return true;
   }
 }

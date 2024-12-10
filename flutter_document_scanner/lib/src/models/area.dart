@@ -77,13 +77,21 @@ class Area extends Equatable {
 
     return Area(
       topLeft: Point(
-          calulateSize(scaleX, topLeft.x), calulateSize(scaleY, topLeft.y)),
+        calulateSize(scaleX, topLeft.x),
+        calulateSize(scaleY, topLeft.y),
+      ),
       topRight: Point(
-          calulateSize(scaleX, topRight.x), calulateSize(scaleY, topRight.y)),
-      bottomLeft: Point(calulateSize(scaleX, bottomLeft.x),
-          calulateSize(scaleY, bottomLeft.y)),
-      bottomRight: Point(calulateSize(scaleX, bottomRight.x),
-          calulateSize(scaleY, bottomRight.y)),
+        calulateSize(scaleX, topRight.x),
+        calulateSize(scaleY, topRight.y),
+      ),
+      bottomLeft: Point(
+        calulateSize(scaleX, bottomLeft.x),
+        calulateSize(scaleY, bottomLeft.y),
+      ),
+      bottomRight: Point(
+        calulateSize(scaleX, bottomRight.x),
+        calulateSize(scaleY, bottomRight.y),
+      ),
       height: newHeight,
       width: newWidth,
     );
