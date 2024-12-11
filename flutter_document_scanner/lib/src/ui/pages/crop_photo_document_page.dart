@@ -421,6 +421,21 @@ class _CropView extends StatelessWidget {
               image: image,
               model: cropPhotoDocumentStyle.getAreaCropPhotoModel!,
             ),
+
+          if (cropPhotoDocumentStyle.closeWidget != null)
+            Positioned(
+              top: cropPhotoDocumentStyle.positionCloseWidget?.top ?? 0,
+              right: cropPhotoDocumentStyle.positionCloseWidget?.right ?? 0,
+              child: InkWell(
+                onTap: () async {
+                  onChangeArea?.call(
+                    await context.read<CropBloc>().getAreaInOriginalSize(image),
+                  );
+                  cropPhotoDocumentStyle.onClose?.call();
+                },
+                child: cropPhotoDocumentStyle.closeWidget,
+              ),
+            )
         ],
       ),
     );

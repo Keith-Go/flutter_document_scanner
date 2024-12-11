@@ -40,6 +40,9 @@ class CropPhotoDocumentStyle {
     this.getAreaCropPhotoModel,
     this.filterWidget,
     this.paddingDot = 25,
+    this.onClose,
+    this.closeWidget,
+    this.positionCloseWidget,
   });
 
   /// Hide the app bar default.
@@ -97,4 +100,8 @@ class CropPhotoDocumentStyle {
   final Widget Function(Widget child)? filterWidget;
 
   final double paddingDot;
+
+  final Widget? closeWidget;
+  final void Function()? onClose;
+  final Rect? positionCloseWidget;
 }

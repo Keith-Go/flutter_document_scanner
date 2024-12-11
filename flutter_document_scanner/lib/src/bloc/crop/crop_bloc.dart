@@ -24,6 +24,7 @@ class CropBloc extends Bloc<CropEvent, CropState> {
   CropBloc({
     required DotUtils dotUtils,
     required ImageUtils imageUtils,
+    this.onChangeArea,
   })  : _dotUtils = dotUtils,
         _imageUtils = imageUtils,
         super(CropState.init()) {
@@ -32,6 +33,7 @@ class CropBloc extends Bloc<CropEvent, CropState> {
     on<CropPhotoByAreaCropped>(_photoByAreaCropped);
   }
 
+  final void Function(Area area)? onChangeArea;
   final DotUtils _dotUtils;
   final ImageUtils _imageUtils;
 
@@ -43,12 +45,15 @@ class CropBloc extends Bloc<CropEvent, CropState> {
   ///
   Size? sizeOriginalImage;
 
+  File? image;
+
   /// Position the dots according to the
   /// sent contour [CropAreaInitialized.areaInitial]
   Future<void> _areaInitialized(
     CropAreaInitialized event,
     Emitter<CropState> emit,
   ) async {
+    image = event.image;
     newScreenSize = Size(
       (event.screenSize.width - event.positionImage.left) -
           event.positionImage.right,
@@ -248,13 +253,16 @@ class CropBloc extends Bloc<CropEvent, CropState> {
   }
 
   /// Get Area In Original Size when area change
-  Future<Area> getAreaInOriginalSize(File image) async {
+  Future<Area> getAreaInOriginalSize([File? image]) async {
     double scalingFactorY = 0;
     double scalingFactorX = 0;
     if (sizeOriginalImage == null) {
-      final imageDecoded = await decodeImageFromList(image.readAsBytesSync());
-      final size =
-          Size(imageDecoded.width.toDouble(), imageDecoded.height.toDouble());
+      final imageDecoded = image == null
+          ? null
+          : await decodeImageFromList(image.readAsBytesSync());
+      final size = imageDecoded == null
+          ? const Size(100, 100)
+          : Size(imageDecoded.width.toDouble(), imageDecoded.height.toDouble());
       sizeOriginalImage = size;
       scalingFactorY = size.height / newScreenSize.height;
       scalingFactorX = size.width / newScreenSize.width;
@@ -283,5 +291,14 @@ class CropBloc extends Bloc<CropEvent, CropState> {
       height: sizeOriginalImage?.height,
       width: sizeOriginalImage?.width,
     );
+  }
+
+  @override
+  Future<void> close() async {
+    final area = await getAreaInOriginalSize();
+    print('area: $area');
+    onChangeArea?.call(area);
+
+    return super.close();
   }
 }

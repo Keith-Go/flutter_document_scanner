@@ -34,6 +34,18 @@ class ButtonGetAreaCropPhoto extends StatelessWidget {
         ),
       ),
       ...model.ortherChilds,
+      if (model.reRetakeWidget != null)
+        Expanded(
+          child: InkWell(
+            onTap: () async {
+              onChangeArea(
+                await context.read<CropBloc>().getAreaInOriginalSize(image),
+              );
+              model.onPressedRetake?.call();
+            },
+            child: model.reRetakeWidget,
+          ),
+        ),
     ];
     return Positioned(
       top: model.position.top,
@@ -64,6 +76,8 @@ class GetAreaCropPhotoModel {
   final VoidCallback? onPressedChild;
   final bool isRow;
   final List<Widget> ortherChilds;
+  Widget? reRetakeWidget;
+  final VoidCallback? onPressedRetake;
 
   GetAreaCropPhotoModel({
     required this.child,
@@ -71,5 +85,7 @@ class GetAreaCropPhotoModel {
     this.onPressedChild,
     this.isRow = true,
     this.ortherChilds = const [],
+    this.reRetakeWidget,
+    this.onPressedRetake,
   });
 }
