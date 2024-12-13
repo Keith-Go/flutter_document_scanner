@@ -86,26 +86,40 @@ class _CameraPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocSelector<AppBloc, AppState, CameraController?>(
-      selector: (state) => state.cameraController,
+    final mediaSize = Size(
+      MediaQuery.of(context).size.width -
+          takePhotoDocumentStyle.left -
+          takePhotoDocumentStyle.right,
+      MediaQuery.of(context).size.height -
+          takePhotoDocumentStyle.top -
+          takePhotoDocumentStyle.bottom,
+    );
+    return BlocConsumer<AppBloc, AppState>(
+      listener: (context, state) {
+        context.read<AppBloc>().add(
+              AppSizeCameraSaved(size: mediaSize),
+            );
+      },
+      buildWhen: (previous, current) =>
+          previous.cameraController != current.cameraController,
       builder: (context, state) {
-        if (state == null) {
+        if (state.cameraController == null) {
           return const Center(
             child: Text(
               'No Camera',
             ),
           );
         }
-        final mediaSize = Size(
-          MediaQuery.of(context).size.width -
-              takePhotoDocumentStyle.left -
-              takePhotoDocumentStyle.right,
-          MediaQuery.of(context).size.height -
-              takePhotoDocumentStyle.top -
-              takePhotoDocumentStyle.bottom,
-        );
+
         final deviceRatio = mediaSize.aspectRatio;
-        final cameraAspectRatio = state.value.aspectRatio;
+        final cameraAspectRatio = state.cameraController!.value.aspectRatio;
+
+        final maxWidth = deviceRatio > cameraAspectRatio
+            ? mediaSize.width
+            : mediaSize.height * cameraAspectRatio;
+        final maxHeight = deviceRatio > cameraAspectRatio
+            ? mediaSize.width / cameraAspectRatio
+            : mediaSize.height;
 
         return Stack(
           fit: StackFit.expand,
@@ -118,15 +132,11 @@ class _CameraPreview extends StatelessWidget {
               right: takePhotoDocumentStyle.right,
               child: Center(
                 child: OverflowBox(
-                  maxWidth: deviceRatio > cameraAspectRatio
-                      ? mediaSize.width
-                      : mediaSize.height * cameraAspectRatio,
-                  maxHeight: deviceRatio > cameraAspectRatio
-                      ? mediaSize.width / cameraAspectRatio
-                      : mediaSize.height,
+                  maxWidth: maxWidth,
+                  maxHeight: maxHeight,
                   child: takePhotoDocumentStyle.filterWidget
-                          ?.call(CameraPreview(state)) ??
-                      CameraPreview(state),
+                          ?.call(CameraPreview(state.cameraController!)) ??
+                      CameraPreview(state.cameraController!),
                 ),
               ),
             ),

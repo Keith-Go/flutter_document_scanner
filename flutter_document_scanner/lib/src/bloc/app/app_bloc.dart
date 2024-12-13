@@ -10,6 +10,7 @@ import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:camera/camera.dart';
+import 'package:flutter/material.dart';
 
 import 'package:flutter_document_scanner/src/bloc/app/app.dart';
 import 'package:flutter_document_scanner/src/bloc/crop/crop.dart';
@@ -36,6 +37,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     on<AppNewEditedImageLoaded>(_newEditedImageLoaded);
     on<AppStartedSavingDocument>(_startedSavingDocument);
     on<AppDocumentSaved>(_documentSaved);
+    on<AppSizeCameraSaved>(_updateSizeCamera);
   }
 
   final ImageUtils _imageUtils;
@@ -44,6 +46,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
 
   CameraController? _cameraController;
   late XFile? _pictureTaken;
+  Size? _sizeCamera;
 
   /// Initialize [CameraController]
   /// based on the parameters sent by [AppCameraInitialized]
@@ -126,11 +129,23 @@ class AppBloc extends Bloc<AppEvent, AppState> {
         ),
       );
     } else {
+      final imageDecoded = await decodeImageFromList(
+        await _pictureTaken!.readAsBytes(),
+      );
+
+      final sizeImage =
+          Size(imageDecoded.width.toDouble(), imageDecoded.height.toDouble());
+      final area = event.areaDefault!.scaleWithCamera(
+        _sizeCamera!,
+        state.cameraController!.value.aspectRatio,
+        sizeImage,
+      );
+
       emit(
         state.copyWith(
           statusTakePhotoPage: AppStatus.success,
           pictureInitial: fileImage,
-          contourInitial: event.areaDefault,
+          contourInitial: area,
           isCustomContourInitial: true,
         ),
       );
@@ -307,6 +322,13 @@ class AppBloc extends Bloc<AppEvent, AppState> {
             event.isSuccess ? AppStatus.success : AppStatus.failure,
       ),
     );
+  }
+
+  Future<void> _updateSizeCamera(
+    AppSizeCameraSaved event,
+    Emitter<AppState> emit,
+  ) async {
+    _sizeCamera = event.size;
   }
 
   @override

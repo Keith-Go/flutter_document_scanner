@@ -10,6 +10,7 @@ import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_document_scanner/src/bloc/app/app_state.dart';
 import 'package:flutter_document_scanner/src/models/area.dart';
 import 'package:flutter_document_scanner_platform_interface/flutter_document_scanner_platform_interface.dart';
@@ -180,5 +181,20 @@ class AppDocumentSaved extends AppEvent {
   @override
   List<Object?> get props => [
         isSuccess,
+      ];
+}
+
+class AppSizeCameraSaved extends AppEvent {
+  /// Create an event instance
+  AppSizeCameraSaved({
+    required this.size,
+  });
+
+  ///
+  final Size size;
+
+  @override
+  List<Object?> get props => [
+        size,
       ];
 }

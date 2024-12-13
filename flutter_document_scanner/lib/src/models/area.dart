@@ -8,6 +8,7 @@
 import 'dart:math';
 
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 
 /// Area composed of 4 points
 class Area extends Equatable {
@@ -19,6 +20,7 @@ class Area extends Equatable {
     required this.bottomRight,
     this.height,
     this.width,
+    this.dashSpace = 0,
   });
 
   /// The top left dot
@@ -37,6 +39,8 @@ class Area extends Equatable {
   final double? height;
   final double? width;
 
+  final double dashSpace;
+
   @override
   List<Object?> get props => [
         topLeft,
@@ -45,6 +49,7 @@ class Area extends Equatable {
         bottomRight,
         height,
         width,
+        dashSpace,
       ];
 
   /// Creates a copy of this Area but with the given fields replaced with
@@ -56,6 +61,7 @@ class Area extends Equatable {
     Point<double>? bottomRight,
     double? height,
     double? width,
+    double? dashSpace,
   }) {
     return Area(
       topLeft: topLeft ?? this.topLeft,
@@ -64,6 +70,7 @@ class Area extends Equatable {
       bottomRight: bottomRight ?? this.bottomRight,
       height: height ?? this.height,
       width: width ?? this.width,
+      dashSpace: dashSpace ?? this.dashSpace,
     );
   }
 
@@ -77,23 +84,97 @@ class Area extends Equatable {
 
     return Area(
       topLeft: Point(
-        calulateSize(scaleX, topLeft.x),
+        calulateSize(scaleX, topLeft.x) + dashSpace,
         calulateSize(scaleY, topLeft.y),
       ),
       topRight: Point(
-        calulateSize(scaleX, topRight.x),
+        calulateSize(scaleX, topRight.x) - dashSpace,
         calulateSize(scaleY, topRight.y),
       ),
       bottomLeft: Point(
-        calulateSize(scaleX, bottomLeft.x),
+        calulateSize(scaleX, bottomLeft.x) + dashSpace,
         calulateSize(scaleY, bottomLeft.y),
       ),
       bottomRight: Point(
-        calulateSize(scaleX, bottomRight.x),
+        calulateSize(scaleX, bottomRight.x) - dashSpace,
         calulateSize(scaleY, bottomRight.y),
       ),
       height: newHeight,
       width: newWidth,
+    );
+  }
+
+  Area scaleWithCamera(
+    Size mediaSize,
+    double cameraAspectRatio,
+    Size imageSize,
+  ) {
+    // return this;
+    final deviceRatio = mediaSize.aspectRatio;
+    final double previewWidth = deviceRatio > cameraAspectRatio
+        ? 0
+        : ((mediaSize.height / cameraAspectRatio) - mediaSize.width) / 2;
+
+    final double previewHeight = deviceRatio > cameraAspectRatio
+        ? ((mediaSize.width * cameraAspectRatio) - mediaSize.height) / 2
+        : 0;
+
+    final size = Size(
+      deviceRatio > cameraAspectRatio
+          ? mediaSize.width
+          : mediaSize.height / cameraAspectRatio,
+      deviceRatio > cameraAspectRatio
+          ? mediaSize.width * cameraAspectRatio
+          : mediaSize.height,
+    );
+
+    double calulateSize(
+      double previewSize,
+      double size,
+    ) {
+      return size + previewSize;
+    }
+
+    print(
+      'previewWidth: $previewWidth - previewHeight: $previewHeight - size: $size',
+    );
+
+    return Area(
+      topLeft: Point(
+        topLeft.x,
+        topLeft.y,
+      ),
+      topRight: Point(
+        topRight.x,
+        topRight.y,
+      ),
+      bottomLeft: Point(
+        bottomLeft.x,
+        bottomLeft.y,
+      ),
+      bottomRight: Point(
+        bottomRight.x,
+        bottomRight.y,
+      ),
+      // topLeft: Point(
+      //   calulateSize(previewWidth, topLeft.x),
+      //   calulateSize(previewHeight, topLeft.y),
+      // ),
+      // topRight: Point(
+      //   calulateSize(-previewWidth, topRight.x),
+      //   calulateSize(previewHeight, topRight.y),
+      // ),
+      // bottomLeft: Point(
+      //   calulateSize(previewWidth, bottomLeft.x),
+      //   calulateSize(-previewHeight, bottomLeft.y),
+      // ),
+      // bottomRight: Point(
+      //   calulateSize(-previewWidth, bottomRight.x),
+      //   calulateSize(-previewHeight, bottomRight.y),
+      // ),
+      height: height,
+      width: width,
+      dashSpace: previewWidth - 5,
     );
   }
 }
